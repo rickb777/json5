@@ -1,6 +1,4 @@
 {
     at: 7,
-    lineNumber: 2,
-    columnNumber: 5,
     message: "invalid character ',' looking for beginning of object key"
 }
