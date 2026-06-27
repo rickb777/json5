@@ -314,6 +314,7 @@ var unmarshalTests = []unmarshalTest{
 
 	// composite tests
 	{in: allValueIndent, ptr: new(All), out: allValue},
+	{in: allValueIndent, ptr: new(All), out: allValue.SetInterface(Number("5.2")), useNumber: true},
 	{in: allValueCompact, ptr: new(All), out: allValue},
 	{in: allValueIndent, ptr: new(*All), out: &allValue},
 	{in: allValueCompact, ptr: new(*All), out: &allValue},
@@ -701,6 +702,7 @@ type All struct {
 	Uintptr uintptr
 	Float32 float32
 	Float64 float64
+	Number  Number
 
 	Foo  string `json:"bar"`
 	Foo2 string `json:"bar2,dummyopt"`
@@ -721,6 +723,7 @@ type All struct {
 	PUintptr *uintptr
 	PFloat32 *float32
 	PFloat64 *float64
+	PNumber  *Number
 
 	String  string
 	PString *string
@@ -754,6 +757,11 @@ type All struct {
 	unexported int
 }
 
+func (all All) SetInterface(i interface{}) All {
+	all.Interface = i
+	return all
+}
+
 type Small struct {
 	Tag string
 }
@@ -773,6 +781,7 @@ var allValue = All{
 	Uintptr: 12,
 	Float32: 14.1,
 	Float64: 15.1,
+	Number:  "16.1",
 	Foo:     "foo",
 	Foo2:    "foo2",
 	IntStr:  42,
@@ -811,6 +820,7 @@ var pallValue = All{
 	PUintptr:   &allValue.Uintptr,
 	PFloat32:   &allValue.Float32,
 	PFloat64:   &allValue.Float64,
+	PNumber:    &allValue.Number,
 	PString:    &allValue.String,
 	PMap:       &allValue.Map,
 	PMapP:      &allValue.MapP,
@@ -835,6 +845,7 @@ var allValueIndent = `{
 	"Uintptr": 12,
 	"Float32": 14.1,
 	"Float64": 15.1,
+	"Number": 16.1,
 	"bar": "foo",
 	"bar2": "foo2",
 	"IntStr": "42",
@@ -852,6 +863,7 @@ var allValueIndent = `{
 	"PUintptr": null,
 	"PFloat32": null,
 	"PFloat64": null,
+	"PNumber": null,
 	"String": "16",
 	"PString": null,
 	"Map": {
@@ -927,6 +939,7 @@ var pallValueIndent = `{
 	"Uintptr": 0,
 	"Float32": 0,
 	"Float64": 0,
+	"Number": "",
 	"bar": "",
 	"bar2": "",
         "IntStr": "0",
@@ -944,6 +957,7 @@ var pallValueIndent = `{
 	"PUintptr": 12,
 	"PFloat32": 14.1,
 	"PFloat64": 15.1,
+	"PNumber": 16.1,
 	"String": "",
 	"PString": "16",
 	"Map": null,
@@ -1130,6 +1144,7 @@ func TestUnmarshalNulls(t *testing.T) {
 		"Uint64"  : null,
 		"Float32" : null,
 		"Float64" : null,
+		"Number"  : null,
 		"String"  : null}`)
 
 	nulls := All{
@@ -1146,7 +1161,8 @@ func TestUnmarshalNulls(t *testing.T) {
 		Uint64:  11,
 		Float32: 12.1,
 		Float64: 13.1,
-		String:  "14"}
+		Number:  "14.1",
+		String:  "15"}
 
 	err := Unmarshal(jsonData, &nulls)
 	if err != nil {
@@ -1154,7 +1170,7 @@ func TestUnmarshalNulls(t *testing.T) {
 	}
 	if !nulls.Bool || nulls.Int != 2 || nulls.Int8 != 3 || nulls.Int16 != 4 || nulls.Int32 != 5 || nulls.Int64 != 6 ||
 		nulls.Uint != 7 || nulls.Uint8 != 8 || nulls.Uint16 != 9 || nulls.Uint32 != 10 || nulls.Uint64 != 11 ||
-		nulls.Float32 != 12.1 || nulls.Float64 != 13.1 || nulls.String != "14" {
+		nulls.Float32 != 12.1 || nulls.Float64 != 13.1 || nulls.Number != "14.1" || nulls.String != "15" {
 
 		t.Errorf("Unmarshal of null values affected primitives")
 	}
